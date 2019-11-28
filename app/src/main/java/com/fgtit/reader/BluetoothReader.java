@@ -17,9 +17,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,8 +47,6 @@ import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import static java.lang.System.out;
 
 /**
  * The main class for achieving the fingerprint functions
@@ -262,7 +260,9 @@ public class BluetoothReader extends AppCompatActivity {
                 case MESSAGE_WRITE:
                     break;
                 case MESSAGE_READ:
+                    // Log.e("DEBUG_DEVICE_MSG", msg.toString());
                     byte[] readBuf = (byte[]) msg.obj;
+                    //Log.e("DEBUG_DEVICE_MSG", print(readBuf));
                     if (readBuf.length > 0) {
                         if (readBuf[0] == (byte) 0x1b) {
                             AddStatusListHex(readBuf, msg.arg1);
@@ -309,6 +309,16 @@ public class BluetoothReader extends AppCompatActivity {
             text = text + " " + Integer.toHexString(data[i] & 0xFF).toUpperCase() + "  ";
         }
         mConversationArrayAdapter.add(text);
+    }
+
+    public static String print(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[ ");
+        for (byte b : bytes) {
+            sb.append(String.format("%02X ", b));
+        }
+        sb.append("]");
+        return sb.toString();
     }
 
     /**
@@ -431,9 +441,14 @@ public class BluetoothReader extends AppCompatActivity {
             return null;
         }
         byte[] imageData = new byte[width * height];
+//        Log.e("DEBUG_DATA", "Offset even: "+(0xf0));
+//        Log.e("DEBUG_DATA", "Offset odd: "+(4 & 0xf0));
         for (int i = 0; i < (width * height / 2); i++) {
             imageData[i * 2] = (byte) (data[i + offset] & 0xf0);
             imageData[i * 2 + 1] = (byte) (data[i + offset] << 4 & 0xf0);
+//            Log.e("DEBUG_DATA", "Actual byte: "+(data[i + offset]));
+//            Log.e("DEBUG_DATA", "Actual byte and f0: "+(data[i + offset] & 0xf0));
+//            Log.e("DEBUG_DATA", "Offset byte ls4 and f0: "+(data[i + offset] << 4 & 0xf0));
         }
         byte[] bmpData = toBmpByte(width, height, imageData);
         return bmpData;
@@ -803,6 +818,7 @@ public class BluetoothReader extends AppCompatActivity {
      * @param datasize the size of the data package
      */
     private void ReceiveCommand(byte[] databuf, int datasize) {
+        Log.e("DEBUG_DATA", "Data stream length: "+ databuf.length+" Data size: "+datasize);
         if (mDeviceCmd == CMD_GETIMAGE) { //receiving the image data from the device
             if (imgSize == IMG200) {   //image size with 152*200
                 memcpy(mUpImage, mUpImageSize, databuf, 0, datasize);
@@ -843,8 +859,10 @@ public class BluetoothReader extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
+                    // the array for the raw fingerprint data; this gives us data of size 73728 bytes
                     byte[] bmpdata = getFingerprintImage(mUpImage, 256, 288, 0/*18*/);
                     textSize.setText("256 * 288");
+
                     Bitmap image = BitmapFactory.decodeByteArray(bmpdata, 0, bmpdata.length);
                     saveJPGimage(image);
 
@@ -969,7 +987,7 @@ public class BluetoothReader extends AppCompatActivity {
                                 AddStatusList("Search Fail");
                         }
                         break;
-                        case CMD_ENROLHOST: {
+                        case CMD_ENROLHOST: {// insert a fingerprint into the local database
                             int size = (byte) (mCmdData[5]) + ((mCmdData[6] << 8) & 0xFF00) - 1;
                             if (mCmdData[7] == 1) {
                                 memcpy(mRefData, 0, mCmdData, 8, size);
@@ -979,6 +997,7 @@ public class BluetoothReader extends AppCompatActivity {
                                 ContentValues values = new ContentValues();
 //                                values.put(DBHelper.TABLE_USER_ID, userId);
                                 values.put(DBHelper.TABLE_USER_ENROL1, mRefData);
+                                Log.e("DEBUG_DATA", "Ref Data length: "+mRefData.length);
                                 userDB.insert(DBHelper.TABLE_USER, null, values);
                                 AddStatusList("Enrol Succeed with finger: " + userId);
                                 userId += 1;
@@ -1001,7 +1020,7 @@ public class BluetoothReader extends AppCompatActivity {
                                 AddStatusList("Search Fail");
                         }
                         break;
-                        case CMD_CAPTUREHOST: {
+                        case CMD_CAPTUREHOST: {// compare a fingerprint to
                             int size = (byte) (mCmdData[5]) + ((mCmdData[6] << 8) & 0xFF00) - 1;
                             if (mCmdData[7] == 1) {
                                 memcpy(mMatData, 0, mCmdData, 8, size);
