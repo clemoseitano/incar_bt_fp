@@ -40,6 +40,7 @@ public class FingerprintReader {
             intent.putExtra(Constants.CAPTURE_IMAGES_KEY, captureImages);
             intent.putExtra(Constants.ENROL_FINGER_KEY, true);
             intent.putExtra(Constants.FINGERS_KEY, fingers);
+            intent.putExtra("is_external", true);
 
             context.startActivityForResult(intent, requestCode);
         }
@@ -61,6 +62,7 @@ public class FingerprintReader {
             intent.putExtra(Constants.CAPTURE_IMAGES_KEY, captureImages);
             intent.putExtra(Constants.ENROL_FINGER_KEY, false);
             intent.putExtra(Constants.FINGERS_KEY, fingers);
+            intent.putExtra("is_external", true);
 
             context.startActivityForResult(intent, requestCode);
         }
