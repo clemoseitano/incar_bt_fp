@@ -23,6 +23,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,8 +49,12 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 /**
  * Copyright (c) 2019 Farmerline LTD. All rights reserved.
@@ -173,8 +178,25 @@ public class FPReaderActivity extends AppCompatActivity {
     private int REQUEST_PERMISSION_CODE = 1;
     private static String[] PERMISSIONS_STORAGE = {Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE};
-    private int countOfEnrolment = 0;
-    private int requiredEnrolment = 3;// TODO: 2019-11-27 make it an argument
+
+    // arguments
+    private int verificationCount = 0;
+    private int requiredEnrolment = 3;
+    private boolean captureImages = true;
+    private boolean enrolFinger = false;
+    private String fingers;
+
+    private HashMap<String, String> commandMessages = new HashMap<>();
+    private int fingerArrayPosition = 0;
+    private ArrayList<String> fingersArray = new ArrayList<>();
+
+    // the id of the user we are enrolling
+    private String fpRespondentId = null;
+    private String fingerResponseId = null;
+    private String currentFinger;
+    private String currentJPGFile;
+    private String currentWSQFile;
+    private String currentRAWFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -190,6 +212,28 @@ public class FPReaderActivity extends AppCompatActivity {
                         REQUEST_PERMISSION_CODE);
             }
         }
+
+        Intent intent = getIntent();
+
+        requiredEnrolment = intent.getIntExtra(Constants.VERIFICATION_COUNT_KEY, 1);
+        captureImages = intent.getBooleanExtra(Constants.CAPTURE_IMAGES_KEY, true);
+        enrolFinger = intent.getBooleanExtra(Constants.ENROL_FINGER_KEY, false);
+        fingers = intent.getStringExtra(Constants.FINGERS_KEY);
+        if (TextUtils.isEmpty(fingers))
+            fingers = Constants.FINGERS.LEFT_HAND_THUMB;//Constants.FINGERS.ALL_FINGERS;
+
+        commandMessages.put("0", "Scan Right Thumb");
+        commandMessages.put("1", "Scan Right Index Finger");
+        commandMessages.put("2", "Scan Right Middle Finger");
+        commandMessages.put("3", "Scan Right Ring Finger");
+        commandMessages.put("4", "Scan Right Pinky Finger");
+        commandMessages.put("5", "Scan Left Thumb");
+        commandMessages.put("6", "Scan Left Index Finger");
+        commandMessages.put("7", "Scan Left Middle Finger");
+        commandMessages.put("8", "Scan Left Ring Finger");
+        commandMessages.put("9", "Scan Left Pinky Finger");
+
+        fingersArray.addAll(Arrays.asList(fingers.split("-")));
 
         CreateDirectory();
 
@@ -224,6 +268,11 @@ public class FPReaderActivity extends AppCompatActivity {
         userId = 1;
         DBHelper userDBHelper = new DBHelper(this);
         userDB = userDBHelper.getWritableDatabase();
+
+        // show devices list and select one
+        // Launch the DeviceListActivity to see devices and do scan
+        Intent serverIntent = new Intent(FPReaderActivity.this, DeviceListActivity.class);
+        startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
     }
 
 
@@ -252,6 +301,26 @@ public class FPReaderActivity extends AppCompatActivity {
                         case BluetoothReaderService.STATE_CONNECTED:
                             mToolbar.setSubtitle(mConnectedDeviceName);
                             mConversationArrayAdapter.clear();
+
+                            // begin action
+                            if (enrolFinger) {
+                                //save the respondent into database
+                                fpRespondentId = UUID.randomUUID().toString();
+
+                                // create a respondent for a new enrolment
+                                ContentValues values = new ContentValues();
+                                values.put(DBHelper.FP_RESPONDENT_ENROLMENT_ID, fpRespondentId);
+                                values.put(DBHelper.FP_RESPONDENT_HAS_IMAGES, captureImages ? 1 : 0);
+                                values.put(DBHelper.FP_RESPONDENT_VERIFICATION_COUNT, requiredEnrolment);
+                                userDB.insert(DBHelper.FP_RESPONDENT_TABLE, null, values);
+
+                                Log.e("DEBUG_RESPONDENT", "FP Respondent ID: " + fpRespondentId);
+
+                                // start enrolling
+                                SendCommand(CMD_ENROLHOST, null, 0);
+                            } else {
+                                SendCommand(CMD_CAPTUREHOST, null, 0);
+                            }
                             break;
                         case BluetoothReaderService.STATE_CONNECTING:
                             mToolbar.setSubtitle(R.string.title_connecting);
@@ -705,9 +774,11 @@ public class FPReaderActivity extends AppCompatActivity {
             case CMD_CLEARID:
                 AddStatusList("Clear ...");
                 break;
-            case CMD_ENROLHOST:
-                AddStatusList("Enrol Template ...");
-                break;
+            case CMD_ENROLHOST: {
+                currentFinger = fingersArray.get(fingerArrayPosition);
+                AddStatusList(commandMessages.get(currentFinger));
+            }
+            break;
             case CMD_CAPTUREHOST:
                 AddStatusList("Capture Template ...");
                 break;
@@ -736,7 +807,7 @@ public class FPReaderActivity extends AppCompatActivity {
                 break;
             case CMD_GETIMAGE:
                 mUpImageSize = 0;
-                AddStatusList("Get Fingerprint Image ...");
+                //AddStatusList("Get Fingerprint Image ...");
                 break;
             case CMD_GETCHAR:
                 AddStatusList("Get Fingerprint Data ...");
@@ -761,15 +832,7 @@ public class FPReaderActivity extends AppCompatActivity {
                 memcpy(mUpImage, mUpImageSize, databuf, 0, datasize);
                 mUpImageSize = mUpImageSize + datasize;
                 if (mUpImageSize >= 15200) {
-                    File file = new File("/sdcard/test.raw");
-                    try {
-                        file.createNewFile();
-                        FileOutputStream out = new FileOutputStream(file);
-                        out.write(mUpImage);
-                        out.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    saveRawData();
 
                     byte[] bmpdata = getFingerprintImage(mUpImage, 152, 200, 0/*18*/);
                     textSize.setText("152 * 200");
@@ -780,21 +843,13 @@ public class FPReaderActivity extends AppCompatActivity {
                     mUpImageSize = 0;
                     mUpImageCount = mUpImageCount + 1;
                     mIsWork = false;
-                    AddStatusList("Display Image");
+                    //AddStatusList("Display Image");
                 }
             } else if (imgSize == IMG288) {   //image size with 256*288
                 memcpy(mUpImage, mUpImageSize, databuf, 0, datasize);
                 mUpImageSize = mUpImageSize + datasize;
                 if (mUpImageSize >= 36864) {
-                    File file = new File("/sdcard/test.raw");
-                    try {
-                        file.createNewFile();
-                        FileOutputStream out = new FileOutputStream(file);
-                        out.write(mUpImage);
-                        out.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    saveRawData();
 
                     // the array for the raw fingerprint data; this gives us data of size 73728 bytes
                     byte[] bmpdata = getFingerprintImage(mUpImage, 256, 288, 0/*18*/);
@@ -806,29 +861,25 @@ public class FPReaderActivity extends AppCompatActivity {
                     byte[] inpdata = new byte[73728];
                     int inpsize = 73728;
                     System.arraycopy(bmpdata, 1078, inpdata, 0, inpsize);
-                    SaveWsqFile(inpdata, inpsize, "fingerprint.wsq");
+                    SaveWsqFile(inpdata, inpsize);
 
                     Log.d(TAG, "bmpdata.length:" + bmpdata.length);
                     fingerprintImage.setImageBitmap(image);
                     mUpImageSize = 0;
                     mUpImageCount = mUpImageCount + 1;
                     mIsWork = false;
-                    AddStatusList("Display Image");
+                    //AddStatusList("Display Image");
+
+                    saveFingerResponse(verificationCount - 1);
+                    if (captureImages)
+                        checkRerun(false);
                 }
             } else if (imgSize == IMG360) {   //image size with 256*360
                 memcpy(mUpImage, mUpImageSize, databuf, 0, datasize);
                 mUpImageSize = mUpImageSize + datasize;
                 //AddStatusList("Image Len="+Integer.toString(mUpImageSize)+"--"+Integer.toString(mUpImageCount));
                 if (mUpImageSize >= 46080) {
-                    File file = new File("/sdcard/test.raw");
-                    try {
-                        file.createNewFile();
-                        FileOutputStream out = new FileOutputStream(file);
-                        out.write(mUpImage);
-                        out.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    saveRawData();
 
                     byte[] bmpdata = getFingerprintImage(mUpImage, 256, 360, 0/*18*/);
                     textSize.setText("256 * 360");
@@ -838,35 +889,19 @@ public class FPReaderActivity extends AppCompatActivity {
                     byte[] inpdata = new byte[92160];
                     int inpsize = 92160;
                     System.arraycopy(bmpdata, 1078, inpdata, 0, inpsize);
-                    SaveWsqFile(inpdata, inpsize, "fingerprint.wsq");
+                    SaveWsqFile(inpdata, inpsize);
 
                     Log.d(TAG, "bmpdata.length:" + bmpdata.length);
                     fingerprintImage.setImageBitmap(image);
                     mUpImageSize = 0;
                     mUpImageCount = mUpImageCount + 1;
                     mIsWork = false;
-                    AddStatusList("Display Image");
+                    //AddStatusList("Display Image");
 
+                    saveFingerResponse(verificationCount - 1);
+                    if (captureImages)
+                        checkRerun(false);
                 }
-
-           /*     File f = new File("/sdcard/fingerprint.png");
-                if (f.exists()) {
-                    f.delete();
-                }
-                try {
-                    FileOutputStream out = new FileOutputStream(f);
-                    image.compress(Bitmap.CompressFormat.PNG, 90, out);
-                    out.flush();
-                    out.close();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                byte[] inpdata=new byte[73728];
-                int inpsize=73728;
-                System.arraycopy(bmpdata,1078, inpdata, 0, inpsize);
-                SaveWsqFile(inpdata,inpsize,"fingerprint.wsq");*/
             }
         } else { //other data received from the device
             // append the databuf received into mCmdData.
@@ -929,49 +964,7 @@ public class FPReaderActivity extends AppCompatActivity {
                         }
                         break;
                         case CMD_CAPTUREHOST: {// compare a fingerprint to
-                            int size = mCmdData[5] + ((mCmdData[6] << 8) & 0xFF00) - 1;
-                            if (mCmdData[7] == 1) {
-                                memcpy(mMatData, 0, mCmdData, 8, size);
-                                mMatSize = size;
-
-                                Cursor cursor = userDB.query(DBHelper.TABLE_USER, null, null,
-                                        null, null, null, null, null);
-                                boolean matchFlag = false;
-                                while (cursor.moveToNext()) {
-                                    int id = cursor.getInt(cursor.getColumnIndex(DBHelper
-                                            .TABLE_USER_ID));
-                                    byte[] enrol1 = cursor.getBlob(cursor.getColumnIndex(DBHelper
-                                            .TABLE_USER_ENROL1));
-                                    int ret = FPMatch.getInstance().MatchFingerData(enrol1,
-                                            mMatData);
-                                    if (ret > 70) {
-                                        AddStatusList("Match OK,Finger = " + id + "!!");
-                                        matchFlag = true;
-                                        break;
-                                    }
-                                }
-                                if (!matchFlag) {
-                                    AddStatusList("Match Fail !!");
-                                }
-                                if (cursor.getCount() == 0) {
-                                    AddStatusList("Match Fail !!");
-                                }
-                                //ISO Format
-                                String bsiso = Conversions.getInstance().IsoChangeCoord(mMatData, 1);
-                                //SaveTextToFile(bsiso,"/sdcard/iso2.txt");
-
-                                File file = new File("/sdcard/fingerprint2.dat");
-                                try {
-                                    file.createNewFile();
-
-                                    FileOutputStream out = new FileOutputStream(file);
-                                    out.write(mRefData);
-                                    out.close();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            } else
-                                AddStatusList("Search Fail");
+                            verifyFinger();
                         }
                         break;
                         case CMD_MATCH: {
@@ -1107,27 +1100,128 @@ public class FPReaderActivity extends AppCompatActivity {
     }
 
     /**
+     * A method to verify a fingerprint
+     */
+    private void verifyFinger() {
+        int size = mCmdData[5] + ((mCmdData[6] << 8) & 0xFF00) - 1;
+        if (mCmdData[7] == 1) {
+            memcpy(mMatData, 0, mCmdData, 8, size);
+            mMatSize = size;
+
+            // get the users in our database
+            Cursor cursor = userDB.query(DBHelper.FP_FINGER_RECORDS_TABLE, null, null,
+                    null, null, null, null, null);
+
+            // a flag for the matching
+            boolean matchFlag = false;
+
+            if (cursor != null) {
+                if (cursor.getCount() > 0)
+                    while (cursor.moveToNext()) {
+                        byte[] enrol1 = cursor.getBlob(cursor.getColumnIndex(DBHelper
+                                .FINGER_RECORD_DATA));
+                        int ret = FPMatch.getInstance().MatchFingerData(enrol1,
+                                mMatData);
+                        if (ret > 70) {
+                            AddStatusList("Got a match");
+                            matchFlag = true;
+                            break;
+                        }
+                    }
+                else {
+                    reScan(true);
+                }
+                cursor.close();
+            }
+            if (!matchFlag) {
+                AddStatusList("Match Fail !!");
+            }
+
+            //ISO Format
+            String bsiso = Conversions.getInstance().IsoChangeCoord(mMatData, 1);
+            //SaveTextToFile(bsiso,"/sdcard/iso2.txt");
+
+            File file = new File("/sdcard/fingerprint2.dat");
+            try {
+                file.createNewFile();
+
+                FileOutputStream out = new FileOutputStream(file);
+                out.write(mRefData);
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else
+            AddStatusList("Search Fail");
+    }
+
+    /**
      * A method to add a fingerprint into our local database
      */
     private void enrolFinger() {
         int size = mCmdData[5] + ((mCmdData[6] << 8) & 0xFF00) - 1;
         if (mCmdData[7] == 1) {
-            countOfEnrolment = countOfEnrolment + 1;
+            if (!TextUtils.isEmpty(fpRespondentId))
+                fingerResponseId = UUID.randomUUID().toString();
+
+            // update the verification count
+            verificationCount = verificationCount + 1;
             memcpy(mRefData, 0, mCmdData, 8, size);
             mRefSize = size;
 
             //save into database
             ContentValues values = new ContentValues();
-            // values.put(DBHelper.TABLE_USER_ID, userId);
             values.put(DBHelper.TABLE_USER_ENROL1, mRefData);
-            Log.e("DEBUG_DATA", "Ref Data length: " + mRefData.length);
             userDB.insert(DBHelper.TABLE_USER, null, values);
-            AddStatusList("Enrol Succeed with finger: " + userId);
             userId += 1;
-            checkRerun(false);
+
+            if (!captureImages) {
+                checkRerun(false);
+
+                // save fingerprint for respondent
+                saveFingerResponse(verificationCount - 1);
+            } else {
+                captureImage();
+                Log.e("DEBUG_FLOW", "Returned");
+            }
         } else {
             checkRerun(true);
         }
+    }
+
+    /**
+     * A method to save the finger recorded
+     *
+     * @param vc the verification index
+     */
+    private void saveFingerResponse(int vc) {
+        if (enrolFinger && !TextUtils.isEmpty(fpRespondentId)) {
+            ContentValues values = new ContentValues();
+            values.put(DBHelper.FINGER_RECORD_RESPONDENT_ID, fpRespondentId);
+            if (TextUtils.isDigitsOnly(currentFinger))
+                values.put(DBHelper.FINGER_RECORD_FINGER_ID, Integer.parseInt(currentFinger));
+            else
+                values.put(DBHelper.FINGER_RECORD_FINGER_ID, 0);
+            values.put(DBHelper.FINGER_RECORD_DATA, mRefData);
+            values.put(DBHelper.FINGER_RECORD_FINGER_RECORD_ID, fingerResponseId);
+            values.put(DBHelper.FINGER_RECORD_VERIFICATION_INDEX, vc);
+            values.put(DBHelper.FINGER_RECORD_JPG_IMAGE, currentJPGFile);
+            values.put(DBHelper.FINGER_RECORD_WSQ_IMAGE, currentWSQFile);
+            values.put(DBHelper.FINGER_RECORD_RAW_FILE, currentRAWFile);
+
+            userDB.insert(DBHelper.FP_FINGER_RECORDS_TABLE, null, values);
+
+            // reset the file names to avoid the possibility of a repetition
+            currentJPGFile = null;
+            currentWSQFile = null;
+            currentRAWFile = null;
+        }
+    }
+
+    private void captureImage() {
+        imgSize = IMG288;
+        mUpImageSize = 0;
+        SendCommand(CMD_GETIMAGE, null, 0);
     }
 
     /**
@@ -1154,20 +1248,76 @@ public class FPReaderActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 if (!b) {
-                    if (countOfEnrolment < requiredEnrolment) {
-                        AddStatusList("Scan finger again");
+                    if (verificationCount < requiredEnrolment) {
+                        //AddStatusList("Scan finger again");
                         SendCommand(CMD_ENROLHOST, null, 0);
-                    } else if (countOfEnrolment == requiredEnrolment) {
-                        AddStatusList("Enrolment complete");
-                        countOfEnrolment = 0;
+                    } else if (verificationCount == requiredEnrolment) {
+                        verificationCount = 0;
+                        if (fingerArrayPosition == fingersArray.size() - 1) {
+                            fingerArrayPosition = 0;
+                            AddStatusList("Enrolment complete");
+                        } else {
+                            fingerArrayPosition = fingerArrayPosition + 1;
+                            SendCommand(CMD_ENROLHOST, null, 0);
+                        }
                     }
                 } else {
-                    if (countOfEnrolment < requiredEnrolment) {
+                    if (verificationCount < requiredEnrolment) {
                         AddStatusList("Failed: Scan finger again");
                         SendCommand(CMD_ENROLHOST, null, 0);
-                    } else if (countOfEnrolment == requiredEnrolment) {
+                    } else if (verificationCount == requiredEnrolment) {
                         AddStatusList("Failed: Enrolment complete");
-                        countOfEnrolment = 0;
+                        verificationCount = 0;
+                    }
+                }
+            }
+        }.start();
+    }
+
+    /**
+     * A method to check whether the there should be a rerun of the fingerprint reader.
+     * It adds a delay of 800ms
+     *
+     * @param b whether the previous run failed or not
+     */
+    private void reScan(final boolean b) {
+        new CountDownTimer(800, 200) {
+            /**
+             * Callback fired on regular interval.
+             *
+             * @param millisUntilFinished The amount of time until finished.
+             */
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            /**
+             * Callback fired when the time is up.
+             */
+            @Override
+            public void onFinish() {
+                if (!b) {
+                    if (verificationCount < requiredEnrolment) {
+                        //AddStatusList("Scan finger again");
+                        SendCommand(CMD_CAPTUREHOST, null, 0);
+                    } else if (verificationCount == requiredEnrolment) {
+                        verificationCount = 0;
+                        if (fingerArrayPosition == fingersArray.size() - 1) {
+                            fingerArrayPosition = 0;
+                            AddStatusList("Found a match");
+                        } else {
+                            fingerArrayPosition = fingerArrayPosition + 1;
+                            SendCommand(CMD_CAPTUREHOST, null, 0);
+                        }
+                    }
+                } else {
+                    if (verificationCount < requiredEnrolment) {
+                        AddStatusList("Failed: Scan finger again");
+                        SendCommand(CMD_CAPTUREHOST, null, 0);
+                    } else if (verificationCount == requiredEnrolment) {
+                        AddStatusList("Could not find any matches");
+                        verificationCount = 0;
                     }
                 }
             }
@@ -1237,7 +1387,6 @@ public class FPReaderActivity extends AppCompatActivity {
         if (!destDir.exists()) {
             destDir.mkdirs();
         }
-
     }
 
     /**
@@ -1247,14 +1396,21 @@ public class FPReaderActivity extends AppCompatActivity {
      */
     public void saveJPGimage(Bitmap bitmap) {
         String dir = sDirectory;
-        String imageFileName = String.valueOf(System.currentTimeMillis());
+        // create the image file name
+        String imageFileName = !TextUtils.isEmpty(fpRespondentId) ? fpRespondentId + "_" +
+                fingerResponseId + ".jpg" : (System.currentTimeMillis()) + ".jpg";
 
         try {
-            File file = new File(dir + imageFileName + ".jpg");
+            // create the actual file to save
+            File file = new File(dir, imageFileName);
             FileOutputStream out = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
             out.flush();
             out.close();
+
+            // set the JPG field for the enrollment
+            if (!TextUtils.isEmpty(fpRespondentId) && enrolFinger && captureImages && file.exists())
+                currentJPGFile = file.getAbsolutePath();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1264,11 +1420,10 @@ public class FPReaderActivity extends AppCompatActivity {
     /**
      * method of saving the image into WSQ format
      *
-     * @param rawdata  raw image data.
-     * @param rawsize  size of the raw image data.
-     * @param filename the file name of the image.
+     * @param rawdata raw image data.
+     * @param rawsize size of the raw image data.
      */
-    public void SaveWsqFile(byte[] rawdata, int rawsize, String filename) {
+    public void SaveWsqFile(byte[] rawdata, int rawsize) {
         byte[] outdata = new byte[rawsize];
         int[] outsize = new int[1];
 
@@ -1279,16 +1434,44 @@ public class FPReaderActivity extends AppCompatActivity {
         }
 
         try {
-            File fs = new File("/sdcard/" + filename);
-            if (fs.exists()) {
-                fs.delete();
-            }
-            new File("/sdcard/" + filename);
-            RandomAccessFile randomFile = new RandomAccessFile("/sdcard/" + filename, "rw");
+            String dir = sDirectory;
+            // create the image file name
+            String imageFileName = !TextUtils.isEmpty(fpRespondentId) ? fpRespondentId + "_" +
+                    fingerResponseId + ".wsq" : (System.currentTimeMillis()) + ".wsq";
+
+            File file = new File(dir, imageFileName);
+            RandomAccessFile randomFile = new RandomAccessFile(file, "rw");
             long fileLength = randomFile.length();
             randomFile.seek(fileLength);
             randomFile.write(outdata, 0, outsize[0]);
             randomFile.close();
+
+            // set the WSQ field for the enrollment
+            if (!TextUtils.isEmpty(fpRespondentId) && enrolFinger && captureImages && file.exists())
+                currentWSQFile = file.getAbsolutePath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void saveRawData() {
+        String dir = sDirectory;
+        // create the image file name
+        String imageFileName = !TextUtils.isEmpty(fpRespondentId) ? fpRespondentId + "_" +
+                fingerResponseId + ".raw" : (System.currentTimeMillis()) + ".raw";
+
+        File file = new File(dir, imageFileName);
+
+        try {
+            file.createNewFile();
+            FileOutputStream out = new FileOutputStream(file);
+            out.write(mUpImage);
+            out.close();
+
+            // set the RAW field for the enrollment
+            if (!TextUtils.isEmpty(fpRespondentId) && enrolFinger && captureImages && file.exists())
+                currentRAWFile = file.getAbsolutePath();
         } catch (IOException e) {
             e.printStackTrace();
         }
