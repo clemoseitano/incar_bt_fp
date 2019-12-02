@@ -1480,16 +1480,14 @@ public class FPReaderActivity extends AppCompatActivity {
     private Toolbar.OnMenuItemClickListener onMenuItemClick = new Toolbar.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem menuItem) {
-            switch (menuItem.getItemId()) {
-                case R.id.scan:
-                    // Launch the DeviceListActivity to see devices and do scan
-                    Intent serverIntent = new Intent(FPReaderActivity.this, DeviceListActivity.class);
-                    startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
-                    return true;
-                case R.id.discoverable:
-                    // Ensure this device is discoverable by others
-                    ensureDiscoverable();
-                    return true;
+            int itemId = menuItem.getItemId();
+            if (itemId == R.id.scan) {// Launch the DeviceListActivity to see devices and do scan
+                Intent serverIntent = new Intent(FPReaderActivity.this, DeviceListActivity.class);
+                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+                return true;
+            } else if (itemId == R.id.discoverable) {// Ensure this device is discoverable by others
+                ensureDiscoverable();
+                return true;
             }
             return true;
         }
