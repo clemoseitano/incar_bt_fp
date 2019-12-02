@@ -25,6 +25,7 @@ public class Constants {
      * A key for the intent/bundle field for the different fingers to scan
      */
     public static final String FINGERS_KEY = "fingers_to_scan";
+    public static final String RESPONDENT_RESULT = "respondent_result";
 
 
     /**

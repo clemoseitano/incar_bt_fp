@@ -197,6 +197,7 @@ public class FPReaderActivity extends AppCompatActivity {
     private String currentJPGFile;
     private String currentWSQFile;
     private String currentRAWFile;
+    private boolean forResult = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -218,6 +219,7 @@ public class FPReaderActivity extends AppCompatActivity {
         requiredEnrolment = intent.getIntExtra(Constants.VERIFICATION_COUNT_KEY, 1);
         captureImages = intent.getBooleanExtra(Constants.CAPTURE_IMAGES_KEY, true);
         enrolFinger = intent.getBooleanExtra(Constants.ENROL_FINGER_KEY, false);
+        forResult = intent.getBooleanExtra("is_external", false);
         fingers = intent.getStringExtra(Constants.FINGERS_KEY);
         if (TextUtils.isEmpty(fingers))
             fingers = Constants.FINGERS.LEFT_HAND_THUMB;//Constants.FINGERS.ALL_FINGERS;
@@ -1120,11 +1122,20 @@ public class FPReaderActivity extends AppCompatActivity {
                     while (cursor.moveToNext()) {
                         byte[] enrol1 = cursor.getBlob(cursor.getColumnIndex(DBHelper
                                 .FINGER_RECORD_DATA));
+                        String respondent = cursor.getString(cursor.getColumnIndex(DBHelper
+                                .FINGER_RECORD_RESPONDENT_ID));
                         int ret = FPMatch.getInstance().MatchFingerData(enrol1,
                                 mMatData);
                         if (ret > 70) {
                             AddStatusList("Got a match");
                             matchFlag = true;
+
+                            if (forResult) {
+                                Intent data = new Intent();
+                                data.putExtra(Constants.RESPONDENT_RESULT, respondent);
+                                setResult(RESULT_OK, data);
+                                finish();
+                            }
                             break;
                         }
                     }
@@ -1256,6 +1267,13 @@ public class FPReaderActivity extends AppCompatActivity {
                         if (fingerArrayPosition == fingersArray.size() - 1) {
                             fingerArrayPosition = 0;
                             AddStatusList("Enrolment complete");
+
+                            if (forResult) {
+                                Intent data = new Intent();
+                                data.putExtra(Constants.RESPONDENT_RESULT, fpRespondentId);
+                                setResult(RESULT_OK, data);
+                                finish();
+                            }
                         } else {
                             fingerArrayPosition = fingerArrayPosition + 1;
                             SendCommand(CMD_ENROLHOST, null, 0);
