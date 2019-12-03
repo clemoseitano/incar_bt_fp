@@ -30,4 +30,7 @@
     <style name="AutoButton" parent="Theme.AppCompat.Light">
         <item name="buttonBarButtonStyle">@color/button_material_light</item>
     </style>
+
+    <style name="Dialog" parent="@android:style/Theme.Dialog">
+    </style>
 </resources>
