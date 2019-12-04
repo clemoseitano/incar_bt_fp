@@ -423,7 +423,7 @@ public class BluetoothReaderService {
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);
-                    Log.d("RAW_DATA", FPReaderActivity.print(buffer, bytes));
+                    //Log.d("RAW_DATA", FPReaderActivity.print(buffer, bytes));
                     // Log.d("ASCII_DATA", FPReaderActivity.printASCII(buffer, bytes));
 
                     // Send the obtained bytes to the UI Activity

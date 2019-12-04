@@ -316,7 +316,7 @@ public class FPReaderActivity extends AppCompatActivity {
                                 values.put(DBHelper.FP_RESPONDENT_VERIFICATION_COUNT, requiredEnrolment);
                                 userDB.insert(DBHelper.FP_RESPONDENT_TABLE, null, values);
 
-                                Log.e("DEBUG_RESPONDENT", "FP Respondent ID: " + fpRespondentId);
+                                //Log.e("DEBUG_RESPONDENT", "FP Respondent ID: " + fpRespondentId);
 
                                 // start enrolling
                                 SendCommand(CMD_ENROLHOST, null, 0);
@@ -748,7 +748,7 @@ public class FPReaderActivity extends AppCompatActivity {
         // zero the lower byte of the checksum
         sendbuf[8 + size] = (byte) (sum >> 8);
 
-        Log.e("DEBUG_COMMAND", print(sendbuf));
+        //Log.e("DEBUG_COMMAND", print(sendbuf));
 
         mIsWork = true;
         TimeOutStart();
