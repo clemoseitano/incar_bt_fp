@@ -18,7 +18,7 @@ public class FingerprintReader {
     private int requestCode;
     private int verificationCount = 1;
     private boolean captureImages = false;
-    private String fingers;
+    private String fingers = "";
 
     public FingerprintReader(AppCompatActivity context) {
         this.context = context;
