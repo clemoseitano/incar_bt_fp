@@ -42,6 +42,7 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -52,6 +53,11 @@ import java.util.UUID;
  * A class to keep a single instance of the {@link com.fgtit.reader.BluetoothReaderService} for the app.
  */
 public class BluetoothReaderFactory {
+    private BluetoothReaderService mChatService = null;// TODO: 2020-01-21
+    private BluetoothAdapter mBluetoothAdapter = null;
+    private HashMap<String, String> commandMessages = new HashMap<>();
+    private String sDirectory = "";
+
     // Message types sent from the BluetoothChatService Handler
     public static final int MESSAGE_STATE_CHANGE = 1;
     public static final int MESSAGE_READ = 2;
@@ -1009,7 +1015,7 @@ public class BluetoothReaderFactory {
                 BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-            startActivity(discoverableIntent);
+            // TODO: 2020-01-21   startActivity(discoverableIntent);
         }
     }
 
@@ -1117,8 +1123,8 @@ public class BluetoothReaderFactory {
         public boolean onMenuItemClick(MenuItem menuItem) {
             int itemId = menuItem.getItemId();
             if (itemId == R.id.scan) {// Launch the DeviceListActivity to see devices and do scan
-                Intent serverIntent = new Intent(FPReaderActivity.this, DeviceListActivity.class);
-                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+//                Intent serverIntent = new Intent(FPReaderActivity.this, DeviceListActivity.class);
+//                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
                 return true;
             } else if (itemId == R.id.discoverable) {// Ensure this device is discoverable by others
                 ensureDiscoverable();
