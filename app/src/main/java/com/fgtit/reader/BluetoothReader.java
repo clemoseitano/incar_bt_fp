@@ -35,7 +35,7 @@ import android.widget.Toast;
 import com.fgtit.data.wsq;
 import com.fgtit.fpcore.FPMatch;
 import com.fgtit.printer.DataUtils;
-import com.fgtit.utils.DBHelper;
+import com.fgtit.utils.FPDatabase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -164,7 +165,7 @@ public class BluetoothReader extends AppCompatActivity {
     private int imgSize;
 
     private int userId; // User ID number
-    private SQLiteDatabase userDB; //SQLite database object
+    private FPDatabase fpDatabase; //SQLite database object
 
     //dynamic setting of the permission for writing the data into phone memory
     private int REQUEST_PERMISSION_CODE = 1;
@@ -217,8 +218,8 @@ public class BluetoothReader extends AppCompatActivity {
 
         //initialize the SQLite
         userId = 1;
-        DBHelper userDBHelper = new DBHelper(this);
-        userDB = userDBHelper.getWritableDatabase();
+        fpDatabase = new FPDatabase(this);
+        fpDatabase.open();
     }
 
 
@@ -301,6 +302,10 @@ public class BluetoothReader extends AppCompatActivity {
 
     private void AddStatusList(String text) {
         mConversationArrayAdapter.add(text);
+    }
+
+    private void AddStatusList(ArrayList<String> text) {
+        mConversationArrayAdapter.addAll(text);
     }
 
     private void AddStatusListHex(byte[] data, int size) {
@@ -645,8 +650,8 @@ public class BluetoothReader extends AppCompatActivity {
         mButton22.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 userId = 1;
-                userDB.delete(DBHelper.TABLE_USER, null, null);
-                userDB.execSQL("update sqlite_sequence set seq=0 where name='User'");
+                fpDatabase.deleteAllUsers();
+                fpDatabase.execSQL("update sqlite_sequence set seq=0 where name='User'");
                 AddStatusList("Clear DB ok!");
             }
         });
@@ -993,29 +998,9 @@ public class BluetoothReader extends AppCompatActivity {
                                 memcpy(mRefData, 0, mCmdData, 8, size);
                                 mRefSize = size;
 
-                                //save into database
-                                ContentValues values = new ContentValues();
-//                                values.put(DBHelper.TABLE_USER_ID, userId);
-                                values.put(DBHelper.TABLE_USER_ENROL1, mRefData);
-                                Log.e("DEBUG_DATA", "Ref Data length: "+mRefData.length);
-                                userDB.insert(DBHelper.TABLE_USER, null, values);
+                                fpDatabase.insertUser(mRefData);
                                 AddStatusList("Enrol Succeed with finger: " + userId);
                                 userId += 1;
-
-                                //ISO Format
-                                //String bsiso=Conversions.getInstance().IsoChangeCoord(mRefData, 1);
-                                //SaveTextToFile(bsiso,"/sdcard/iso1.txt");
-
-                                //File file=new File("/sdcard/fingerprint1.dat");
-                                //try {
-                                //	file.createNewFile();
-
-                                //	FileOutputStream out=new FileOutputStream(file);
-                                //	out.write(mRefData);
-                                //	out.close();
-                                //} catch (IOException e) {
-                                //	e.printStackTrace();
-                                //}
                             } else
                                 AddStatusList("Search Fail");
                         }
@@ -1025,43 +1010,7 @@ public class BluetoothReader extends AppCompatActivity {
                             if (mCmdData[7] == 1) {
                                 memcpy(mMatData, 0, mCmdData, 8, size);
                                 mMatSize = size;
-
-                                Cursor cursor = userDB.query(DBHelper.TABLE_USER, null, null,
-                                        null, null, null, null, null);
-                                boolean matchFlag = false;
-                                while (cursor.moveToNext()) {
-                                    int id = cursor.getInt(cursor.getColumnIndex(DBHelper
-                                            .TABLE_USER_ID));
-                                    byte[] enrol1 = cursor.getBlob(cursor.getColumnIndex(DBHelper
-                                            .TABLE_USER_ENROL1));
-                                    int ret = FPMatch.getInstance().MatchFingerData(enrol1,
-                                            mMatData);
-                                    if (ret > 70) {
-                                        AddStatusList("Match OK,Finger = " + id + "!!");
-                                        matchFlag = true;
-                                        break;
-                                    }
-                                }
-                                if(!matchFlag){
-                                    AddStatusList("Match Fail !!");
-                                }
-                                if(cursor.getCount() == 0){
-                                    AddStatusList("Match Fail !!");
-                                }
-                                //ISO Format
-                                //	String bsiso=Conversions.getInstance().IsoChangeCoord(mMatData, 1);
-                                //	SaveTextToFile(bsiso,"/sdcard/iso2.txt");
-
-                                //	File file=new File("/sdcard/fingerprint2.dat");
-                                //	try {
-                                //	file.createNewFile();
-
-                                //	FileOutputStream out=new FileOutputStream(file);
-                                //	out.write(mRefData);
-                                //	out.close();
-                                //} catch (IOException e) {
-                                //	e.printStackTrace();
-                                //}
+                                AddStatusList(fpDatabase.getUsers(mMatData));
                             } else
                                 AddStatusList("Search Fail");
                         }
@@ -1242,7 +1191,6 @@ public class BluetoothReader extends AppCompatActivity {
         super.onStop();
     }
 
-
     private void ensureDiscoverable() {
         if (mBluetoothAdapter.getScanMode() !=
                 BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
@@ -1331,7 +1279,6 @@ public class BluetoothReader extends AppCompatActivity {
             return true;
         }
     };
-
 
     public String bytesToAscii(byte[] bytes, int offset, int dateLen) {
         if ((bytes == null) || (bytes.length == 0) || (offset < 0) || (dateLen <= 0)) {
