@@ -1,10 +1,8 @@
 package com.fgtit;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,7 +15,6 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -25,13 +22,10 @@ import androidx.appcompat.widget.Toolbar;
 import com.fgtit.data.Conversions;
 import com.fgtit.data.wsq;
 import com.fgtit.fpcore.FPMatch;
-import com.fgtit.printer.DataUtils;
 import com.fgtit.reader.BluetoothReaderService;
-import com.fgtit.reader.Constants;
-import com.fgtit.reader.DeviceListActivity;
-import com.fgtit.reader.FPReaderActivity;
 import com.fgtit.reader.R;
-import com.fgtit.utils.DBHelper;
+import com.fgtit.utils.FPDatabase;
+import com.fgtit.utils.FingerprintResponse;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -104,7 +98,7 @@ public class BluetoothReaderFactory {
     public static final int IMG288 = 288;
     public static final int IMG360 = 360;
 
-    private final SQLiteDatabase userDB;
+    private final FPDatabase fpDatabase;
 
     /**
      * A listener to publish events from the Bluetooth device
@@ -232,8 +226,8 @@ public class BluetoothReaderFactory {
 
     private BluetoothReaderFactory(AppCompatActivity context) {
         this.context = context;
-        DBHelper userDBHelper = new DBHelper(context);
-        userDB = userDBHelper.getWritableDatabase();
+        fpDatabase = new FPDatabase(context);
+        fpDatabase.open();
     }
 
     /**
@@ -284,15 +278,7 @@ public class BluetoothReaderFactory {
                             if (enrolFinger) {
                                 //save the respondent into database
                                 fpRespondentId = UUID.randomUUID().toString();
-
-                                // create a respondent for a new enrolment
-                                ContentValues values = new ContentValues();
-                                values.put(DBHelper.FP_RESPONDENT_ENROLMENT_ID, fpRespondentId);
-                                values.put(DBHelper.FP_RESPONDENT_HAS_IMAGES, captureImages ? 1 : 0);
-                                values.put(DBHelper.FP_RESPONDENT_VERIFICATION_COUNT, requiredEnrolment);
-                                userDB.insert(DBHelper.FP_RESPONDENT_TABLE, null, values);
-
-                                //Log.e("DEBUG_RESPONDENT", "FP Respondent ID: " + fpRespondentId);
+                                fpDatabase.insertRespondent(fpRespondentId, captureImages, requiredEnrolment);
 
                                 // start enrolling
                                 SendCommand(CMD_ENROLHOST, null, 0);
@@ -641,21 +627,17 @@ public class BluetoothReaderFactory {
             mMatSize = size;
 
             // get the users in our database
-            Cursor cursor = userDB.query(DBHelper.FP_FINGER_RECORDS_TABLE, null, null,
-                    null, null, null, null, null);
+            ArrayList<FingerprintResponse> fingerprintResponses = fpDatabase.getFingerprintResponses();
 
             // a flag for the matching
             boolean matchFlag = false;
 
-            if (cursor != null) {
-                if (cursor.getCount() > 0)
-                    while (cursor.moveToNext()) {
-                        byte[] enrol1 = cursor.getBlob(cursor.getColumnIndex(DBHelper
-                                .FINGER_RECORD_DATA));
-                        String respondent = cursor.getString(cursor.getColumnIndex(DBHelper
-                                .FINGER_RECORD_RESPONDENT_ID));
-                        int ret = FPMatch.getInstance().MatchFingerData(enrol1,
-                                mMatData);
+            if (fingerprintResponses != null) {
+                if (fingerprintResponses.size() > 0) {
+                    for (FingerprintResponse response: fingerprintResponses) {
+                        byte[] enrol1 = response.getFpData();
+                        String respondent = response.getFpRespondentId();
+                        int ret = FPMatch.getInstance().MatchFingerData(enrol1, mMatData);
                         if (ret > 70) {
                             if (mListener != null)
                                 mListener.onPublishMessage("Got a match");
@@ -663,18 +645,14 @@ public class BluetoothReaderFactory {
 
                             if (forResult) {
                                 if (mListener != null) mListener.onRequestCompleted(respondent);
-//                                Intent data = new Intent();
-//                                data.putExtra(Constants.RESPONDENT_RESULT, respondent);
-//                                setResult(RESULT_OK, data);
-//                                finish();
                             }
                             break;
                         }
                     }
+                }
                 else {
                     reScan(true);
                 }
-                cursor.close();
             }
             if (!matchFlag) {
                 if (mListener != null)
@@ -713,10 +691,7 @@ public class BluetoothReaderFactory {
             memcpy(mRefData, 0, mCmdData, 8, size);
             mRefSize = size;
 
-            //save into database
-            ContentValues values = new ContentValues();
-            values.put(DBHelper.TABLE_USER_ENROL1, mRefData);
-            userDB.insert(DBHelper.TABLE_USER, null, values);
+            fpDatabase.insertUser(mRefData);
 
             if (!captureImages) {
                 checkRerun(false);
@@ -739,21 +714,7 @@ public class BluetoothReaderFactory {
      */
     private void saveFingerResponse(int vc) {
         if (enrolFinger && !TextUtils.isEmpty(fpRespondentId)) {
-            ContentValues values = new ContentValues();
-            values.put(DBHelper.FINGER_RECORD_RESPONDENT_ID, fpRespondentId);
-            if (TextUtils.isDigitsOnly(currentFinger))
-                values.put(DBHelper.FINGER_RECORD_FINGER_ID, Integer.parseInt(currentFinger));
-            else
-                values.put(DBHelper.FINGER_RECORD_FINGER_ID, 0);
-            values.put(DBHelper.FINGER_RECORD_DATA, mRefData);
-            values.put(DBHelper.FINGER_RECORD_FINGER_RECORD_ID, fingerResponseId);
-            values.put(DBHelper.FINGER_RECORD_VERIFICATION_INDEX, vc);
-            values.put(DBHelper.FINGER_RECORD_JPG_IMAGE, currentJPGFile);
-            values.put(DBHelper.FINGER_RECORD_WSQ_IMAGE, currentWSQFile);
-            values.put(DBHelper.FINGER_RECORD_RAW_FILE, currentRAWFile);
-
-            userDB.insert(DBHelper.FP_FINGER_RECORDS_TABLE, null, values);
-
+            fpDatabase.createFingerprintResponse(fpRespondentId, currentFinger, mRefData, fingerResponseId, vc, currentJPGFile, currentWSQFile, currentRAWFile);
             // reset the file names to avoid the possibility of a repetition
             currentJPGFile = null;
             currentWSQFile = null;

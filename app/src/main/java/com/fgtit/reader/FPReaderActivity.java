@@ -9,7 +9,6 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -39,7 +38,8 @@ import com.fgtit.data.Conversions;
 import com.fgtit.data.wsq;
 import com.fgtit.fpcore.FPMatch;
 import com.fgtit.printer.DataUtils;
-import com.fgtit.utils.DBHelper;
+import com.fgtit.utils.FPDatabase;
+import com.fgtit.utils.FingerprintResponse;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -172,7 +172,7 @@ public class FPReaderActivity extends AppCompatActivity {
     private int imgSize;
 
     private int userId; // User ID number
-    private SQLiteDatabase userDB; //SQLite database object
+    private FPDatabase fpDatabase; //SQLite database object
 
     //dynamic setting of the permission for writing the data into phone memory
     private int REQUEST_PERMISSION_CODE = 1;
@@ -268,8 +268,8 @@ public class FPReaderActivity extends AppCompatActivity {
 
         //initialize the SQLite
         userId = 1;
-        DBHelper userDBHelper = new DBHelper(this);
-        userDB = userDBHelper.getWritableDatabase();
+        fpDatabase = new FPDatabase(this);
+        fpDatabase.open();
 
         // show devices list and select one
         // Launch the DeviceListActivity to see devices and do scan
@@ -309,12 +309,7 @@ public class FPReaderActivity extends AppCompatActivity {
                                 //save the respondent into database
                                 fpRespondentId = UUID.randomUUID().toString();
 
-                                // create a respondent for a new enrolment
-                                ContentValues values = new ContentValues();
-                                values.put(DBHelper.FP_RESPONDENT_ENROLMENT_ID, fpRespondentId);
-                                values.put(DBHelper.FP_RESPONDENT_HAS_IMAGES, captureImages ? 1 : 0);
-                                values.put(DBHelper.FP_RESPONDENT_VERIFICATION_COUNT, requiredEnrolment);
-                                userDB.insert(DBHelper.FP_RESPONDENT_TABLE, null, values);
+                                fpDatabase.insertRespondent(fpRespondentId, captureImages, requiredEnrolment);
 
                                 //Log.e("DEBUG_RESPONDENT", "FP Respondent ID: " + fpRespondentId);
 
@@ -645,8 +640,8 @@ public class FPReaderActivity extends AppCompatActivity {
         clearDBButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 userId = 1;
-                userDB.delete(DBHelper.TABLE_USER, null, null);
-                userDB.execSQL("update sqlite_sequence set seq=0 where name='User'");
+                fpDatabase.deleteAllUsers();
+                fpDatabase.execSQL("update sqlite_sequence set seq=0 where name='User'");
                 AddStatusList("Clear DB ok!");
             }
         });
@@ -1111,21 +1106,17 @@ public class FPReaderActivity extends AppCompatActivity {
             mMatSize = size;
 
             // get the users in our database
-            Cursor cursor = userDB.query(DBHelper.FP_FINGER_RECORDS_TABLE, null, null,
-                    null, null, null, null, null);
+            ArrayList<FingerprintResponse> fingerprintResponses = fpDatabase.getFingerprintResponses();
 
             // a flag for the matching
             boolean matchFlag = false;
 
-            if (cursor != null) {
-                if (cursor.getCount() > 0)
-                    while (cursor.moveToNext()) {
-                        byte[] enrol1 = cursor.getBlob(cursor.getColumnIndex(DBHelper
-                                .FINGER_RECORD_DATA));
-                        String respondent = cursor.getString(cursor.getColumnIndex(DBHelper
-                                .FINGER_RECORD_RESPONDENT_ID));
-                        int ret = FPMatch.getInstance().MatchFingerData(enrol1,
-                                mMatData);
+            if (fingerprintResponses != null) {
+                if (fingerprintResponses.size() > 0) {
+                    for (FingerprintResponse responnse : fingerprintResponses) {
+                        byte[] enrol1 = responnse.getFpData();
+                        String respondent = responnse.getFpRespondentId();
+                        int ret = FPMatch.getInstance().MatchFingerData(enrol1, mMatData);
                         if (ret > 70) {
                             AddStatusList("Got a match");
                             matchFlag = true;
@@ -1139,10 +1130,10 @@ public class FPReaderActivity extends AppCompatActivity {
                             break;
                         }
                     }
+                }
                 else {
                     reScan(true);
                 }
-                cursor.close();
             }
             if (!matchFlag) {
                 AddStatusList("Match Fail !!");
@@ -1179,11 +1170,7 @@ public class FPReaderActivity extends AppCompatActivity {
             verificationCount = verificationCount + 1;
             memcpy(mRefData, 0, mCmdData, 8, size);
             mRefSize = size;
-
-            //save into database
-            ContentValues values = new ContentValues();
-            values.put(DBHelper.TABLE_USER_ENROL1, mRefData);
-            userDB.insert(DBHelper.TABLE_USER, null, values);
+            fpDatabase.insertUser(mRefData);
             userId += 1;
 
             if (!captureImages) {
@@ -1207,22 +1194,7 @@ public class FPReaderActivity extends AppCompatActivity {
      */
     private void saveFingerResponse(int vc) {
         if (enrolFinger && !TextUtils.isEmpty(fpRespondentId)) {
-            ContentValues values = new ContentValues();
-            values.put(DBHelper.FINGER_RECORD_RESPONDENT_ID, fpRespondentId);
-            if (TextUtils.isDigitsOnly(currentFinger))
-                values.put(DBHelper.FINGER_RECORD_FINGER_ID, Integer.parseInt(currentFinger));
-            else
-                values.put(DBHelper.FINGER_RECORD_FINGER_ID, 0);
-            values.put(DBHelper.FINGER_RECORD_DATA, mRefData);
-            values.put(DBHelper.FINGER_RECORD_FINGER_RECORD_ID, fingerResponseId);
-            values.put(DBHelper.FINGER_RECORD_VERIFICATION_INDEX, vc);
-            values.put(DBHelper.FINGER_RECORD_JPG_IMAGE, currentJPGFile);
-            values.put(DBHelper.FINGER_RECORD_WSQ_IMAGE, currentWSQFile);
-            values.put(DBHelper.FINGER_RECORD_RAW_FILE, currentRAWFile);
-
-            userDB.insert(DBHelper.FP_FINGER_RECORDS_TABLE, null, values);
-
-            // reset the file names to avoid the possibility of a repetition
+            fpDatabase.createFingerprintResponse(fpRespondentId, currentFinger, mRefData, fingerResponseId, vc, currentJPGFile, currentWSQFile, currentRAWFile);
             currentJPGFile = null;
             currentWSQFile = null;
             currentRAWFile = null;
