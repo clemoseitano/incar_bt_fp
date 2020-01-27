@@ -255,7 +255,7 @@ public class FPDatabase {
             if (cursor.getCount() > 0){
                 cursor.moveToFirst();
                 FingerprintResponse fingerprintResponse = new FingerprintResponse();
-                fingerprintResponse.setFpFingerRecordId(fingerPrintId);
+                fingerprintResponse.setFpFingerRecordId(cursor.getString(cursor.getColumnIndex(FINGER_RECORD_FINGER_RECORD_ID)));
                 fingerprintResponse.setId(cursor.getInt(cursor.getColumnIndex("id")));
                 fingerprintResponse.setCreatedAt(cursor.getString(cursor.getColumnIndex(CREATED_AT)));
                 fingerprintResponse.setFpData(cursor.getBlob(cursor.getColumnIndex(FINGER_RECORD_DATA)));
@@ -326,6 +326,31 @@ public class FPDatabase {
             e.printStackTrace();
         }
         return fingerprintResponses;
+    }
+
+    public FingerprintResponse getFingerPrintRespondentResponse(String fpRespondentId){
+        try{
+            String where = FINGER_RECORD_RESPONDENT_ID + " = '" + fpRespondentId+"'";
+            @SuppressLint("Recycle") Cursor cursor = ourDatabase.query(FP_FINGER_RECORDS_TABLE, null, where, null, null, null, null);
+            if (cursor.getCount() > 0){
+                cursor.moveToFirst();
+                FingerprintResponse fingerprintResponse = new FingerprintResponse();
+                fingerprintResponse.setFpFingerRecordId(cursor.getString(cursor.getColumnIndex(FINGER_RECORD_FINGER_RECORD_ID)));
+                fingerprintResponse.setId(cursor.getInt(cursor.getColumnIndex("id")));
+                fingerprintResponse.setCreatedAt(cursor.getString(cursor.getColumnIndex(CREATED_AT)));
+                fingerprintResponse.setFpData(cursor.getBlob(cursor.getColumnIndex(FINGER_RECORD_DATA)));
+                fingerprintResponse.setFpJPGImage(cursor.getString(cursor.getColumnIndex(FINGER_RECORD_JPG_IMAGE)));
+                fingerprintResponse.setFpWSQImage(cursor.getString(cursor.getColumnIndex(FINGER_RECORD_WSQ_IMAGE)));
+                fingerprintResponse.setFpRawImage(cursor.getString(cursor.getColumnIndex(FINGER_RECORD_RAW_FILE)));
+                fingerprintResponse.setFpVerificationIndex(cursor.getInt(cursor.getColumnIndex(FINGER_RECORD_VERIFICATION_INDEX)));
+                fingerprintResponse.setFpRespondentId(cursor.getString(cursor.getColumnIndex(FINGER_RECORD_RESPONDENT_ID)));
+                fingerprintResponse.setFpFingerId(cursor.getInt(cursor.getColumnIndex(FINGER_RECORD_FINGER_ID)));
+                return fingerprintResponse;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void insertRespondent(String fpRespondentId, boolean captureImages, int requiredEnrolment){
