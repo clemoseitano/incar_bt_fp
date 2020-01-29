@@ -5,12 +5,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -138,7 +138,8 @@ public class FPReaderActivity extends AppCompatActivity {
     // Name of the connected device
     private String mConnectedDeviceName = null;
     // Array adapter for the conversation thread
-    private ArrayAdapter<String> mConversationArrayAdapter;
+    private ArrayList<String> mConversationArray;
+    private FPReaderAdapter readerAdapter;
     // String buffer for outgoing messages
     private StringBuffer mOutStringBuffer;
     // Local Bluetooth adapter
@@ -168,7 +169,7 @@ public class FPReaderActivity extends AppCompatActivity {
     public byte[] mIsoData = new byte[378];
     private byte lowHighByte;
     private Toolbar mToolbar;
-    private TextView textSize;
+    private TextView textSize, btState;
     private int imgSize;
 
     private int userId; // User ID number
@@ -234,17 +235,29 @@ public class FPReaderActivity extends AppCompatActivity {
         commandMessages.put("7", "Scan Left Middle Finger");
         commandMessages.put("8", "Scan Left Ring Finger");
         commandMessages.put("9", "Scan Left Pinky Finger");
+        commandMessages.put("10", "Scanner ready. Place finger on the scanner and lift after the beep");
 
         fingersArray.addAll(Arrays.asList(fingers.split("-")));
 
         CreateDirectory();
 
         textSize = findViewById(R.id.textSize);
+        btState = findViewById(R.id.bt_state);
         //toolbar
         mToolbar = findViewById(R.id.toolbar);
-        mToolbar.setTitle("Bluetooth Reader");
-        mToolbar.setSubtitle("not connected");
+        mToolbar.setTitle("Capture Fingerprint");
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.write));
+        btState.setText(R.string.title_not_connected);
         setSupportActionBar(mToolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        Drawable upArrow = getResources().getDrawable(R.drawable.ic_back);
+        upArrow.setColorFilter(getResources().getColor(R.color.write), PorterDuff.Mode.SRC_ATOP);
+        getSupportActionBar().setHomeAsUpIndicator(upArrow);
+
+        mToolbar.getOverflowIcon().setColorFilter(getResources().getColor(R.color.write), PorterDuff.Mode.SRC_ATOP);
 
         mToolbar.setOnMenuItemClickListener(onMenuItemClick);
 
@@ -261,9 +274,9 @@ public class FPReaderActivity extends AppCompatActivity {
         //initialize the match function of the fingerprint
         int feedback = FPMatch.getInstance().InitMatch(1, "");
         if (feedback == 0) {
-            Toast.makeText(this, "Init Match ok", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Init Match ok", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Init Match failed", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Init Match failed", Toast.LENGTH_SHORT).show();
         }
 
         //initialize the SQLite
@@ -276,7 +289,6 @@ public class FPReaderActivity extends AppCompatActivity {
         Intent serverIntent = new Intent(FPReaderActivity.this, DeviceListActivity.class);
         startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
     }
-
 
     @Override
     public void onStart() {
@@ -292,6 +304,13 @@ public class FPReaderActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        setResult(RESULT_CANCELED, null);
+        finish();
+        return super.onOptionsItemSelected(item);
+    }
+
     // The Handler that gets information back from the BluetoothChatService
     @SuppressLint("HandlerLeak")
     private final Handler mHandler = new Handler() {
@@ -301,9 +320,10 @@ public class FPReaderActivity extends AppCompatActivity {
                 case MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case BluetoothReaderService.STATE_CONNECTED:
-                            mToolbar.setSubtitle(mConnectedDeviceName);
-                            mConversationArrayAdapter.clear();
-
+                            btState.setText("Connected to: " + mConnectedDeviceName);
+                            mConversationArray.clear();
+                            readerAdapter = new FPReaderAdapter(FPReaderActivity.this, mConversationArray);
+                            mConversationView.setAdapter(readerAdapter);
                             // begin action
                             if (enrolFinger) {
                                 //save the respondent into database
@@ -320,11 +340,11 @@ public class FPReaderActivity extends AppCompatActivity {
                             }
                             break;
                         case BluetoothReaderService.STATE_CONNECTING:
-                            mToolbar.setSubtitle(R.string.title_connecting);
+                            btState.setText(R.string.title_connecting);
                             break;
                         case BluetoothReaderService.STATE_LISTEN:
                         case BluetoothReaderService.STATE_NONE:
-                            mToolbar.setSubtitle(R.string.title_not_connected);
+                            btState.setText(R.string.title_not_connected);
                             break;
                     }
                     break;
@@ -369,9 +389,10 @@ public class FPReaderActivity extends AppCompatActivity {
         }
     }
 
-
     private void AddStatusList(String text) {
-        mConversationArrayAdapter.add(text);
+        mConversationArray.add(text);
+        readerAdapter = new FPReaderAdapter(this, mConversationArray);
+        mConversationView.setAdapter(readerAdapter);
     }
 
     private void AddStatusListHex(byte[] data, int size) {
@@ -379,7 +400,9 @@ public class FPReaderActivity extends AppCompatActivity {
         for (int i = 0; i < size; i++) {
             text = text + " " + Integer.toHexString(data[i] & 0xFF).toUpperCase() + "  ";
         }
-        mConversationArrayAdapter.add(text);
+        mConversationArray.add(text);
+        readerAdapter = new FPReaderAdapter(this, mConversationArray);
+        mConversationView.setAdapter(readerAdapter);
     }
 
     public static String print(byte[] bytes) {
@@ -452,7 +475,6 @@ public class FPReaderActivity extends AppCompatActivity {
         byte[] bytes = {b1, b2, b3, b4};
         return bytes;
     }
-
 
     /**
      * generate the image data into Bitmap format
@@ -565,9 +587,10 @@ public class FPReaderActivity extends AppCompatActivity {
         Log.d(TAG, "setupChat()");
 
         // Initialize the array adapter for the conversation thread
-        mConversationArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
+        mConversationArray = new ArrayList<>();
+        readerAdapter = new FPReaderAdapter(this, mConversationArray);
         mConversationView = findViewById(R.id.in);
-        mConversationView.setAdapter(mConversationArrayAdapter);
+        mConversationView.setAdapter(readerAdapter);
 
         fingerprintImage = findViewById(R.id.imageView1);
 
@@ -1358,7 +1381,6 @@ public class FPReaderActivity extends AppCompatActivity {
         super.onStop();
     }
 
-
     private void ensureDiscoverable() {
         if (mBluetoothAdapter.getScanMode() !=
                 BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
@@ -1406,7 +1428,6 @@ public class FPReaderActivity extends AppCompatActivity {
         }
     }
 
-
     /**
      * method of saving the image into WSQ format
      *
@@ -1443,7 +1464,6 @@ public class FPReaderActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
 
     private void saveRawData() {
         String dir = sDirectory;
@@ -1482,7 +1502,6 @@ public class FPReaderActivity extends AppCompatActivity {
             return true;
         }
     };
-
 
     public String bytesToAscii(byte[] bytes, int offset, int dateLen) {
         if ((bytes == null) || (bytes.length == 0) || (offset < 0) || (dateLen <= 0)) {

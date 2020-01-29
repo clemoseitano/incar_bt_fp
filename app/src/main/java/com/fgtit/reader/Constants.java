@@ -42,6 +42,7 @@ public class Constants {
         public static final String LEFT_HAND_MIDDLE_FINGER = "7";
         public static final String LEFT_HAND_RING_FINGER = "8";
         public static final String LEFT_HAND_PINKY = "9";
+        public static final String ANY_HAND_FINGER = "10"; //A generic constant for any finger
         public static final String ALL_FINGERS = "0-1-2-3-4-4-6-7-8-9";
     }
 }
