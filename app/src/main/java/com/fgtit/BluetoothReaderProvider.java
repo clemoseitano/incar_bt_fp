@@ -228,7 +228,7 @@ public class BluetoothReaderProvider {
         // Send a failure message back to the Activity
         Message msg = mHandler.obtainMessage(BluetoothReader.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(BluetoothReader.TOAST, "Unable to connect device");
+        bundle.putString(BluetoothReader.TOAST, "Unable to connect to Fingerprint reader");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
     }
@@ -242,7 +242,7 @@ public class BluetoothReaderProvider {
         // Send a failure message back to the Activity
         Message msg = mHandler.obtainMessage(BluetoothReader.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(BluetoothReader.TOAST, "Device connection was lost");
+        bundle.putString(BluetoothReader.TOAST, "Fingerprint reader disconnected!");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
     }

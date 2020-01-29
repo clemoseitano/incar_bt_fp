@@ -16,25 +16,60 @@
     </androidx.appcompat.widget.Toolbar>
 
     <LinearLayout
+        android:id="@+id/bluetooth_header"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/toolbar"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp"
+        android:background="@drawable/bg_dashed_rounded_edges"
+        android:layout_margin="20dp"
+        android:paddingStart="20dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_bluetooth"/>
+
+        <TextView
+            android:id="@+id/bt_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/green"
+            android:text="@string/reader_connected"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp" />
+
+    </LinearLayout>
+
+    <RelativeLayout
         android:id="@+id/ll"
         android:layout_width="match_parent"
         android:layout_height="240dp"
-        android:layout_below="@+id/toolbar"
+        android:layout_below="@+id/bluetooth_header"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:scrollbars="none"
         android:baselineAligned="false">
 
         <ListView
             android:id="@+id/in"
             android:layout_width="match_parent"
             android:layout_height="220dp"
-            android:layout_weight="1"
             android:stackFromBottom="true"
+            android:divider="#F9F9F9"
+            android:dividerHeight="1dp"
             android:transcriptMode="alwaysScroll" />
 
         <LinearLayout
             android:layout_width="256dp"
             android:layout_height="228dp"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/imageView1"
@@ -49,7 +84,7 @@
                 android:gravity="center"
                 android:textColor="@color/black" />
         </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

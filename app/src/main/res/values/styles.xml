@@ -18,7 +18,7 @@
     </style>
 
     <!--popupTheme-->
-    <style name="ToolbarPopupTheme" parent="@style/ThemeOverlay.AppCompat.Dark">
+    <style name="ToolbarPopupTheme" parent="@style/ThemeOverlay.AppCompat.Light">
         <!--<item name="android:colorBackground">#000000</item> 也可以设置背景色以及menu中的其他属性-->
         <item name="actionOverflowMenuStyle">@style/OverflowMenuStyle</item>
     </style>
@@ -32,5 +32,19 @@
     </style>
 
     <style name="Dialog" parent="@android:style/Theme.Dialog">
+    </style>
+
+    <style name="MyMaterialTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppPrimaryTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="color">@android:color/white</item>
     </style>
 </resources>
