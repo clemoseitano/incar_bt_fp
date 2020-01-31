@@ -1,7 +1,6 @@
 package com.fgtit.reader;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,7 +90,7 @@ public class FPReaderAdapter extends BaseAdapter {
         if (status.contains("Failed")){
             notification.setText((String) getItem(position-1));
             statusText.setText(status);
-            statusText.setTextColor(context.getResources().getColor(R.color.red));
+            statusText.setTextColor(context.getResources().getColor(R.color.fp_red));
             statusImg.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_x_circle));
         }else {
             if (position == this.status.size()-1){
