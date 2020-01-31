@@ -100,7 +100,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
 
                 <Button
@@ -112,7 +112,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
 
@@ -124,7 +124,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
             </LinearLayout>
 
@@ -141,7 +141,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button5"
@@ -152,7 +152,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:layout_width="0dp"
@@ -188,7 +188,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
 
                 <Button
@@ -200,7 +200,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button8"
@@ -211,7 +211,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
             </LinearLayout>
 
@@ -228,7 +228,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button20"
@@ -239,7 +239,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button21"
@@ -250,7 +250,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
 
             </LinearLayout>
@@ -268,7 +268,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button22"
@@ -316,7 +316,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button10"
@@ -327,7 +327,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
 
                 <Button
@@ -340,7 +340,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
             </LinearLayout>
 
@@ -357,7 +357,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button11"
@@ -368,7 +368,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button12"
@@ -379,7 +379,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
             </LinearLayout>
 
@@ -410,7 +410,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button15"
@@ -421,7 +421,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
 
                 <Button
@@ -433,7 +433,7 @@
                     android:textAllCaps="false"
                     android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
             </LinearLayout>
         </LinearLayout>
