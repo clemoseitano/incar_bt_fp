@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textColor="@color/green"
+            android:textColor="@color/fp_green"
             android:text="@string/reader_connected"
             android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp" />
@@ -82,7 +82,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textColor="@color/black" />
+                android:textColor="@color/fp_black" />
         </LinearLayout>
     </RelativeLayout>
 
@@ -103,7 +103,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="In Host"
-                android:textColor="@color/black" />
+                android:textColor="@color/fp_black" />
         </LinearLayout>
 
         <LinearLayout
@@ -117,7 +117,7 @@
                 android:layout_weight="1"
                 android:text="@string/EnrolHost"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/fp_black"
                 android:textSize="10sp"
                 android:theme="@style/AutoButton" />
 
@@ -129,7 +129,7 @@
                 android:layout_weight="1"
                 android:text="@string/CaptureHost"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/fp_black"
                 android:textSize="10sp"
                 android:theme="@style/AutoButton" />
 
@@ -140,7 +140,7 @@
                 android:layout_weight="1"
                 android:text="@string/Match"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/fp_black"
                 android:textSize="10sp"
                 android:theme="@style/AutoButton" />
 
@@ -157,7 +157,7 @@
                 android:layout_weight="1"
                 android:text="@string/getimage200"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/fp_black"
                 android:textSize="10sp"
                 android:theme="@style/AutoButton" />
 
@@ -168,7 +168,7 @@
                 android:layout_weight="1"
                 android:text="@string/getimage288"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/fp_black"
                 android:textSize="10sp"
                 android:theme="@style/AutoButton" />
 
@@ -179,7 +179,7 @@
                 android:layout_weight="1"
                 android:text="@string/getimage360"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/fp_black"
                 android:textSize="10sp"
                 android:theme="@style/AutoButton" />
 
@@ -197,7 +197,7 @@
                 android:layout_weight="1"
                 android:text="@string/getdata"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/fp_black"
                 android:textSize="10sp"
                 android:theme="@style/AutoButton" />
 
@@ -208,7 +208,7 @@
                 android:layout_weight="1"
                 android:text="@string/ClearDB"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/fp_black"
                 android:textSize="10sp" />
 
 
@@ -231,7 +231,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Device"
-                android:textColor="@color/black" />
+                android:textColor="@color/fp_black" />
         </LinearLayout>
 
         <LinearLayout
@@ -245,7 +245,7 @@
                 android:layout_weight="1"
                 android:text="@string/getdevsn"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/fp_black"
                 android:textSize="10sp"
                 android:theme="@style/AutoButton" />
 
@@ -256,7 +256,7 @@
                 android:layout_weight="1"
                 android:text="@string/getbat"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/fp_black"
                 android:textSize="10sp"
                 android:theme="@style/AutoButton" />
 
@@ -268,7 +268,7 @@
                 android:layout_weight="1"
                 android:text="@string/getversion"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/fp_black"
                 android:textSize="10sp"
                 android:theme="@style/AutoButton" />
 

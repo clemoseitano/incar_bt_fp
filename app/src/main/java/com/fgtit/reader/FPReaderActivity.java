@@ -27,7 +27,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -246,7 +245,7 @@ public class FPReaderActivity extends AppCompatActivity {
         //toolbar
         mToolbar = findViewById(R.id.toolbar);
         mToolbar.setTitle("Capture Fingerprint");
-        mToolbar.setTitleTextColor(getResources().getColor(R.color.write));
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.fp_write));
         btState.setText(R.string.title_not_connected);
         setSupportActionBar(mToolbar);
 
@@ -254,10 +253,10 @@ public class FPReaderActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         Drawable upArrow = getResources().getDrawable(R.drawable.ic_back);
-        upArrow.setColorFilter(getResources().getColor(R.color.write), PorterDuff.Mode.SRC_ATOP);
+        upArrow.setColorFilter(getResources().getColor(R.color.fp_write), PorterDuff.Mode.SRC_ATOP);
         getSupportActionBar().setHomeAsUpIndicator(upArrow);
 
-        mToolbar.getOverflowIcon().setColorFilter(getResources().getColor(R.color.write), PorterDuff.Mode.SRC_ATOP);
+        mToolbar.getOverflowIcon().setColorFilter(getResources().getColor(R.color.fp_write), PorterDuff.Mode.SRC_ATOP);
 
         mToolbar.setOnMenuItemClickListener(onMenuItemClick);
 
