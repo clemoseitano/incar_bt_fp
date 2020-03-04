@@ -222,6 +222,7 @@ public class FPReaderActivity extends AppCompatActivity {
         enrolFinger = intent.getBooleanExtra(Constants.ENROL_FINGER_KEY, false);
         forResult = intent.getBooleanExtra("is_external", false);
         fingers = intent.getStringExtra(Constants.FINGERS_KEY);
+        fpRespondentId = intent.getStringExtra(Constants.CUSTOM_RESPONDENT_ID);
         if (TextUtils.isEmpty(fingers))
             fingers = Constants.FINGERS.LEFT_HAND_THUMB;//Constants.FINGERS.ALL_FINGERS;
 
@@ -327,7 +328,9 @@ public class FPReaderActivity extends AppCompatActivity {
                             // begin action
                             if (enrolFinger) {
                                 //save the respondent into database
-                                fpRespondentId = UUID.randomUUID().toString();
+                                if (TextUtils.isEmpty(fpRespondentId)) {
+                                    fpRespondentId = UUID.randomUUID().toString();
+                                }
 
                                 fpDatabase.insertRespondent(fpRespondentId, captureImages, requiredEnrolment);
 
@@ -1140,7 +1143,7 @@ public class FPReaderActivity extends AppCompatActivity {
                         byte[] enrol1 = responnse.getFpData();
                         String respondent = responnse.getFpRespondentId();
                         int ret = FPMatch.getInstance().MatchFingerData(enrol1, mMatData);
-                        if (ret > 70) {
+                        if (ret >= 70) {
                             AddStatusList("Got a match");
                             matchFlag = true;
 
@@ -1159,7 +1162,12 @@ public class FPReaderActivity extends AppCompatActivity {
                 }
             }
             if (!matchFlag) {
-                AddStatusList("Match Fail !!");
+                AddStatusList("No match found!");
+
+                Intent data = new Intent();
+                data.putExtra(Constants.RESPONDENT_RESULT, "");
+                setResult(RESULT_OK, data);
+                finish();
             }
 
             //ISO Format
