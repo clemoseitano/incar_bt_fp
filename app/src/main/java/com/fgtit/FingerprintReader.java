@@ -19,6 +19,7 @@ public class FingerprintReader {
     private int verificationCount = 1;
     private boolean captureImages = false;
     private String fingers = "";
+    private String customFPRespondentId ="";
 
     public FingerprintReader(AppCompatActivity context) {
         this.context = context;
@@ -40,6 +41,7 @@ public class FingerprintReader {
             intent.putExtra(Constants.CAPTURE_IMAGES_KEY, captureImages);
             intent.putExtra(Constants.ENROL_FINGER_KEY, true);
             intent.putExtra(Constants.FINGERS_KEY, fingers);
+            intent.putExtra(Constants.CUSTOM_RESPONDENT_ID, customFPRespondentId);
             intent.putExtra("is_external", true);
 
             context.startActivityForResult(intent, requestCode);
@@ -62,6 +64,7 @@ public class FingerprintReader {
             intent.putExtra(Constants.CAPTURE_IMAGES_KEY, captureImages);
             intent.putExtra(Constants.ENROL_FINGER_KEY, false);
             intent.putExtra(Constants.FINGERS_KEY, fingers);
+            intent.putExtra(Constants.CUSTOM_RESPONDENT_ID, customFPRespondentId);
             intent.putExtra("is_external", true);
 
             context.startActivityForResult(intent, requestCode);
@@ -76,6 +79,19 @@ public class FingerprintReader {
      */
     public FingerprintReader setRequestCode(int rc) {
         this.requestCode = rc;
+        return this;
+    }
+
+    /**
+     * A method to set a custom respondentId for cases where maintaining synchronization with an existing
+     * ID system is required. Each custom ID must be unique. {@link java.util.UUID#randomUUID()#toString()} can be used to generate such IDs
+     * Note that the library generates a unique respondent id for fingerprints
+     *
+     * @param customFPRespondentId the custom respondentID
+     * @return {@link FingerprintReader} the current instance of this class
+     */
+    public FingerprintReader setCustomFPRespondentId(String customFPRespondentId){
+        this.customFPRespondentId = customFPRespondentId;
         return this;
     }
 

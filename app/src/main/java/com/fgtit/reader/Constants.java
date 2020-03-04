@@ -26,6 +26,7 @@ public class Constants {
      */
     public static final String FINGERS_KEY = "fingers_to_scan";
     public static final String RESPONDENT_RESULT = "respondent_result";
+    public static final String CUSTOM_RESPONDENT_ID = "custom_respondent_id";
 
 
     /**
