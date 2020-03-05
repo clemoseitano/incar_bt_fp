@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme" parent="AppTheme.Base">
+    <style name="FPAppTheme" parent="FPAppTheme.Base">
     </style>
 
-    <style name="MyMaterialTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="FPMyMaterialTheme" parent="Theme.AppCompat.Light.NoActionBar">
 
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/fp_colorPrimary</item>
+        <item name="colorPrimaryDark">@color/fp_colorPrimaryDark</item>
+        <item name="colorAccent">@color/fp_colorAccent</item>
     </style>
 </resources>

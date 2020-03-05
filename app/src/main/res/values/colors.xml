@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="write">#FFFFFF</color>
-    <color name="black">#000000</color>
-    <color name="gray">#80bebebe</color>
+    <color name="fp_write">#FFFFFF</color>
+    <color name="fp_black">#000000</color>
+    <color name="fp_gray">#80bebebe</color>
 
-    <color name="colorPrimary">#0438b3</color>
-    <color name="colorPrimaryDark">#252c3a</color>
-    <color name="colorPrimaryLight">#E4EBFD</color>
-    <color name="backgrounds">#fafbff</color>
-    <color name="titleHeaders">#F7F8FA</color>
-    <color name="colorAccent">#0438b3</color>
-    <color name="red">#EB5250</color>
-    <color name="green">#1AAE70</color>
-    <color name="greenLight">#D0FFD5</color>
+    <color name="fp_colorPrimary">#0438b3</color>
+    <color name="fp_colorPrimaryDark">#252c3a</color>
+    <color name="fp_colorPrimaryLight">#E4EBFD</color>
+    <color name="fp_backgrounds">#fafbff</color>
+    <color name="fp_titleHeaders">#F7F8FA</color>
+    <color name="fp_colorAccent">#0438b3</color>
+    <color name="fp_red">#EB5250</color>
+    <color name="fp_green">#1AAE70</color>
+    <color name="fp_greenLight">#D0FFD5</color>
 </resources>

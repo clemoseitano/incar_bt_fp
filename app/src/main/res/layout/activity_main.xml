@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        app:popupTheme="@style/ToolbarPopupTheme">
+        app:popupTheme="@style/FPToolbarPopupTheme">
 
     </androidx.appcompat.widget.Toolbar>
 
@@ -46,7 +46,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textColor="@color/black" />
+                android:textColor="@color/fp_black" />
         </LinearLayout>
     </LinearLayout>
 
@@ -83,7 +83,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="In ID"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/fp_black" />
             </LinearLayout>
 
 
@@ -98,9 +98,9 @@
                     android:layout_weight="1"
                     android:text="@string/EnrolID"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
 
                 <Button
@@ -110,9 +110,9 @@
                     android:layout_weight="1"
                     android:text="@string/Verify"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
 
@@ -122,9 +122,9 @@
                     android:layout_weight="1"
                     android:text="@string/Identify"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
             </LinearLayout>
 
@@ -139,9 +139,9 @@
                     android:layout_weight="1"
                     android:text="@string/DeleteID"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button5"
@@ -150,9 +150,9 @@
                     android:layout_weight="1"
                     android:text="@string/ClearID"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:layout_width="0dp"
@@ -172,7 +172,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="In Host"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/fp_black" />
             </LinearLayout>
 
             <LinearLayout
@@ -186,9 +186,9 @@
                     android:layout_weight="1"
                     android:text="@string/EnrolHost"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
 
                 <Button
@@ -198,9 +198,9 @@
                     android:layout_weight="1"
                     android:text="@string/CaptureHost"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button8"
@@ -209,9 +209,9 @@
                     android:layout_weight="1"
                     android:text="@string/Match"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
             </LinearLayout>
 
@@ -226,9 +226,9 @@
                     android:layout_weight="1"
                     android:text="@string/getimage200"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button20"
@@ -237,9 +237,9 @@
                     android:layout_weight="1"
                     android:text="@string/getimage288"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button21"
@@ -248,9 +248,9 @@
                     android:layout_weight="1"
                     android:text="@string/getimage360"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
 
             </LinearLayout>
@@ -266,9 +266,9 @@
                     android:layout_weight="1"
                     android:text="@string/getdata"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button22"
@@ -277,7 +277,7 @@
                     android:layout_weight="1"
                     android:text="@string/ClearDB"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp" />
 
 
@@ -300,7 +300,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Smart Card"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/fp_black" />
             </LinearLayout>
 
             <LinearLayout
@@ -314,9 +314,9 @@
                     android:layout_weight="1"
                     android:text="@string/WriteFPCard"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button10"
@@ -325,9 +325,9 @@
                     android:layout_weight="1"
                     android:text="@string/ReadFPCard"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
 
                 <Button
@@ -338,9 +338,9 @@
                     android:layout_weight="1"
                     android:text="@string/FPCardMatch"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
             </LinearLayout>
 
@@ -355,9 +355,9 @@
                     android:layout_weight="1"
                     android:text="@string/CardSn"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button11"
@@ -366,9 +366,9 @@
                     android:layout_weight="1"
                     android:text="@string/ReadDataCard"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button12"
@@ -377,9 +377,9 @@
                     android:layout_weight="1"
                     android:text="@string/WriteDataCard"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
             </LinearLayout>
 
@@ -394,7 +394,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Device"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/fp_black" />
             </LinearLayout>
 
             <LinearLayout
@@ -408,9 +408,9 @@
                     android:layout_weight="1"
                     android:text="@string/getdevsn"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
                 <Button
                     android:id="@+id/button15"
@@ -419,9 +419,9 @@
                     android:layout_weight="1"
                     android:text="@string/getbat"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
 
                 <Button
@@ -431,9 +431,9 @@
                     android:layout_weight="1"
                     android:text="@string/getversion"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fp_black"
                     android:textSize="10sp"
-                    android:theme="@style/AutoButton" />
+                    android:theme="@style/FPAutoButton" />
 
             </LinearLayout>
         </LinearLayout>
