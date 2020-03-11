@@ -72,6 +72,52 @@ public class FingerprintReader {
     }
 
     /**
+     * A method to start enrolling fingerprints
+     *
+     * @throws Exception an exception with a message of what went wrong
+     */
+    public void readCard() throws Exception {
+        if (context == null) {
+            throw new NullPointerException("Context cannot be null");
+        } else if (requestCode <= 0) {
+            throw new IllegalArgumentException("Request code should be a positive number less than five digits long");
+        } else {
+            Intent intent = new Intent(context, FPReaderActivity.class);
+            intent.putExtra(Constants.VERIFICATION_COUNT_KEY, verificationCount);
+            intent.putExtra(Constants.CAPTURE_IMAGES_KEY, captureImages);
+            intent.putExtra(Constants.FP_ACTION, Constants.Actions.READ_CARD);
+            intent.putExtra(Constants.FINGERS_KEY, fingers);
+            intent.putExtra(Constants.CUSTOM_RESPONDENT_ID, customFPRespondentId);
+            intent.putExtra("is_external", true);
+
+            context.startActivityForResult(intent, requestCode);
+        }
+    }
+
+    /**
+     * A method to start enrolling fingerprints
+     *
+     * @throws Exception an exception with a message of what went wrong
+     */
+    public void writeCard() throws Exception {
+        if (context == null) {
+            throw new NullPointerException("Context cannot be null");
+        } else if (requestCode <= 0) {
+            throw new IllegalArgumentException("Request code should be a positive number less than five digits long");
+        } else {
+            Intent intent = new Intent(context, FPReaderActivity.class);
+            intent.putExtra(Constants.VERIFICATION_COUNT_KEY, verificationCount);
+            intent.putExtra(Constants.CAPTURE_IMAGES_KEY, captureImages);
+            intent.putExtra(Constants.FP_ACTION, Constants.Actions.WRITE_CARD);
+            intent.putExtra(Constants.FINGERS_KEY, fingers);
+            intent.putExtra(Constants.CUSTOM_RESPONDENT_ID, customFPRespondentId);
+            intent.putExtra("is_external", true);
+
+            context.startActivityForResult(intent, requestCode);
+        }
+    }
+
+    /**
      * A method to set the request code for the results of the activity
      *
      * @param rc the request code

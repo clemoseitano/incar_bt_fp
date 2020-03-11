@@ -184,6 +184,7 @@ public class FPReaderActivity extends AppCompatActivity {
     private int requiredEnrolment = 3;
     private boolean captureImages = true;
     private boolean enrolFinger = false;
+    private int action;
     private String fingers;
 
     private HashMap<String, String> commandMessages = new HashMap<>();
@@ -219,6 +220,7 @@ public class FPReaderActivity extends AppCompatActivity {
         requiredEnrolment = intent.getIntExtra(Constants.VERIFICATION_COUNT_KEY, 1);
         captureImages = intent.getBooleanExtra(Constants.CAPTURE_IMAGES_KEY, true);
         enrolFinger = intent.getBooleanExtra(Constants.ENROL_FINGER_KEY, false);
+        action = intent.getIntExtra(Constants.FP_ACTION, Constants.Actions.READ_CARD);
         forResult = intent.getBooleanExtra("is_external", false);
         fingers = intent.getStringExtra(Constants.FINGERS_KEY);
         fpRespondentId = intent.getStringExtra(Constants.CUSTOM_RESPONDENT_ID);
@@ -325,20 +327,31 @@ public class FPReaderActivity extends AppCompatActivity {
                             readerAdapter = new FPReaderAdapter(FPReaderActivity.this, mConversationArray);
                             mConversationView.setAdapter(readerAdapter);
                             // begin action
-                            if (enrolFinger) {
-                                //save the respondent into database
-                                if (TextUtils.isEmpty(fpRespondentId)) {
-                                    fpRespondentId = UUID.randomUUID().toString();
+                            switch (action) {
+                                case Constants.Actions.ENROL_FINGERPRINT:
+                                case Constants.Actions.VERIFY_FINGERPRINT:
+                                if (enrolFinger) {
+                                    //save the respondent into database
+                                    if (TextUtils.isEmpty(fpRespondentId)) {
+                                        fpRespondentId = UUID.randomUUID().toString();
+                                    }
+
+                                    fpDatabase.insertRespondent(fpRespondentId, captureImages, requiredEnrolment);
+
+                                    //Log.e("DEBUG_RESPONDENT", "FP Respondent ID: " + fpRespondentId);
+
+                                    // start enrolling
+                                    SendCommand(CMD_ENROLHOST, null, 0);
+                                } else {
+                                    SendCommand(CMD_CAPTUREHOST, null, 0);
                                 }
-
-                                fpDatabase.insertRespondent(fpRespondentId, captureImages, requiredEnrolment);
-
-                                //Log.e("DEBUG_RESPONDENT", "FP Respondent ID: " + fpRespondentId);
-
-                                // start enrolling
-                                SendCommand(CMD_ENROLHOST, null, 0);
-                            } else {
-                                SendCommand(CMD_CAPTUREHOST, null, 0);
+                                break;
+                                case Constants.Actions.READ_CARD:
+                                    SendCommand(CMD_READFPCARD, null, 0);
+                                    break;
+                                case Constants.Actions.WRITE_CARD:
+                                    SendCommand(CMD_WRITEFPCARD, null, 0);
+                                    break;
                             }
                             break;
                         case BluetoothReaderService.STATE_CONNECTING:
@@ -353,9 +366,9 @@ public class FPReaderActivity extends AppCompatActivity {
                 case MESSAGE_WRITE:
                     break;
                 case MESSAGE_READ:
-                    // Log.e("DEBUG_DEVICE_MSG", msg.toString());
+                    Log.e("DEBUG_DEVICE_MSG", msg.toString());
                     byte[] readBuf = (byte[]) msg.obj;
-                    //Log.e("DEBUG_DEVICE_MSG", print(readBuf));
+                    Log.e("DEBUG_DEVICE_MSG", print(readBuf));
                     if (readBuf.length > 0) {
                         if (readBuf[0] == (byte) 0x1b) {
                             AddStatusListHex(readBuf, msg.arg1);
@@ -1345,6 +1358,7 @@ public class FPReaderActivity extends AppCompatActivity {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_CONNECT_DEVICE:
                 // When DeviceListActivity returns with a device to connect
@@ -1401,11 +1415,11 @@ public class FPReaderActivity extends AppCompatActivity {
      * Create directory folder for storing the images
      */
     public void CreateDirectory() {
-        sDirectory = Environment.getExternalStorageDirectory() + "/Fingerprint Images/";
-        File destDir = new File(sDirectory);
-        if (!destDir.exists()) {
-            destDir.mkdirs();
-        }
+//        sDirectory = Environment.getExternalStorageDirectory() + "/Fingerprint Images/";
+//        File destDir = new File(sDirectory);
+//        if (!destDir.exists()) {
+//            destDir.mkdirs();
+//        }
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.fgtit.reader;
 
+import java.security.PublicKey;
+
 /**
  * Copyright (c) 2019 Farmerline LTD. All rights reserved.
  * Created by Clement Osei Tano K on 28/11/2019.
@@ -27,6 +29,7 @@ public class Constants {
     public static final String FINGERS_KEY = "fingers_to_scan";
     public static final String RESPONDENT_RESULT = "respondent_result";
     public static final String CUSTOM_RESPONDENT_ID = "custom_respondent_id";
+    public static final String FP_ACTION = "fp_action";
 
 
     /**
@@ -45,5 +48,12 @@ public class Constants {
         public static final String LEFT_HAND_PINKY = "9";
         public static final String ANY_HAND_FINGER = "10"; //A generic constant for any finger
         public static final String ALL_FINGERS = "0-1-2-3-4-4-6-7-8-9";
+    }
+
+    public static final class Actions{
+        public static final int WRITE_CARD = 1;
+        public static final int READ_CARD = 2;
+        public static final int ENROL_FINGERPRINT = 3;
+        public static final int VERIFY_FINGERPRINT = 4;
     }
 }
