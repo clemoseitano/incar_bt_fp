@@ -220,7 +220,7 @@ public class FPReaderActivity extends AppCompatActivity {
         requiredEnrolment = intent.getIntExtra(Constants.VERIFICATION_COUNT_KEY, 1);
         captureImages = intent.getBooleanExtra(Constants.CAPTURE_IMAGES_KEY, true);
         enrolFinger = intent.getBooleanExtra(Constants.ENROL_FINGER_KEY, false);
-        action = intent.getIntExtra(Constants.FP_ACTION, Constants.Actions.READ_CARD);
+        action = intent.getIntExtra(Constants.FP_ACTION, Constants.Actions.ENROL_FINGERPRINT);
         forResult = intent.getBooleanExtra("is_external", false);
         fingers = intent.getStringExtra(Constants.FINGERS_KEY);
         fpRespondentId = intent.getStringExtra(Constants.CUSTOM_RESPONDENT_ID);
