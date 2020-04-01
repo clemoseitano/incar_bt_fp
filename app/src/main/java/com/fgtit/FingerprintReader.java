@@ -40,6 +40,7 @@ public class FingerprintReader {
             intent.putExtra(Constants.VERIFICATION_COUNT_KEY, verificationCount);
             intent.putExtra(Constants.CAPTURE_IMAGES_KEY, captureImages);
             intent.putExtra(Constants.ENROL_FINGER_KEY, true);
+            intent.putExtra(Constants.FP_ACTION, Constants.Actions.ENROL_FINGERPRINT);
             intent.putExtra(Constants.FINGERS_KEY, fingers);
             intent.putExtra(Constants.CUSTOM_RESPONDENT_ID, customFPRespondentId);
             intent.putExtra("is_external", true);
@@ -64,6 +65,7 @@ public class FingerprintReader {
             intent.putExtra(Constants.CAPTURE_IMAGES_KEY, captureImages);
             intent.putExtra(Constants.ENROL_FINGER_KEY, false);
             intent.putExtra(Constants.FINGERS_KEY, fingers);
+            intent.putExtra(Constants.FP_ACTION, Constants.Actions.VERIFY_FINGERPRINT);
             intent.putExtra(Constants.CUSTOM_RESPONDENT_ID, customFPRespondentId);
             intent.putExtra("is_external", true);
 
