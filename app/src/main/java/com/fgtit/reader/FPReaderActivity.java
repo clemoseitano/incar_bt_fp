@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,6 +23,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -200,6 +202,9 @@ public class FPReaderActivity extends AppCompatActivity {
     private String currentRAWFile;
     private boolean forResult = false;
 
+    SharedPreferences preferences;
+    SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -288,8 +293,14 @@ public class FPReaderActivity extends AppCompatActivity {
 
         // show devices list and select one
         // Launch the DeviceListActivity to see devices and do scan
-        Intent serverIntent = new Intent(FPReaderActivity.this, DeviceListActivity.class);
-        startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        editor = preferences.edit();
+        if (preferences.getString("selected_bt_device", "").isEmpty()) {
+            Intent serverIntent = new Intent(FPReaderActivity.this, DeviceListActivity.class);
+            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+        }else {
+            connectDevice(preferences.getString("selected_bt_device", ""));
+        }
     }
 
     @Override
@@ -1357,6 +1368,14 @@ public class FPReaderActivity extends AppCompatActivity {
         }.start();
     }
 
+    private void connectDevice(String address){
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        // Attempt to connect to the device
+        if (mChatService == null) setupChat();
+        mChatService.connect(device);
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
@@ -1366,9 +1385,7 @@ public class FPReaderActivity extends AppCompatActivity {
                     // Get the device MAC address
                     String address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
                     // Get the BLuetoothDevice object
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-                    // Attempt to connect to the device
-                    mChatService.connect(device);
+                    connectDevice(address);
                 }
                 break;
             case REQUEST_ENABLE_BT:

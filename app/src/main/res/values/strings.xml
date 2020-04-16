@@ -55,6 +55,8 @@
     <string name="ClearDB">Clear DB data</string>
     <string name="reader_connected">Bluetooth reader connected!</string>
     <string name="fingerprint_captured">Fingerprint captured</string>
+    <string name="no_bt_devices_found">No bluetooth devices found</string>
+    <string name="unable_to_connect">Unable to connect to device</string>
 
 
 </resources>

@@ -11,6 +11,7 @@
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:theme="@style/FPAppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".FPReaderActivity"
@@ -25,7 +26,8 @@
         <activity
             android:name="com.fgtit.reader.DeviceListActivity"
             android:label="@string/select_device"
-            android:theme="@style/FPDialog" />
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
             android:name=".BluetoothReader"
             android:screenOrientation="portrait"
