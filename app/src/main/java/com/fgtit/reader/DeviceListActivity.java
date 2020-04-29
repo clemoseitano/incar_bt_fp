@@ -230,7 +230,7 @@ public class DeviceListActivity extends AppCompatActivity {
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 setProgressBarIndeterminateVisibility(false);
                 setTitle(R.string.select_device);
-                if (mNewDevicesArrayAdapter.getCount() == 0) {
+                if (mNewDevicesArrayAdapter == null || mNewDevicesArrayAdapter.getCount() == 0) {
                     Toast.makeText(context, R.string.no_bt_devices_found, Toast.LENGTH_LONG).show();
                 }
             }
