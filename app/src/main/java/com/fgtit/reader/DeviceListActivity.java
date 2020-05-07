@@ -186,7 +186,11 @@ public class DeviceListActivity extends AppCompatActivity {
     public void onItemClicked() {
         // Cancel discovery because it's costly and we're about to connect
         mBtAdapter.cancelDiscovery();
-        BluetoothDevice bluetoothDevice = ((BluetoothListAdapter)newDevicesListView.getAdapter()).getSelectedBluetoothDevice();
+        BluetoothListAdapter listAdapter = (BluetoothListAdapter)newDevicesListView.getAdapter();
+        BluetoothDevice bluetoothDevice = null;
+        if (listAdapter != null){
+            bluetoothDevice = listAdapter.getSelectedBluetoothDevice();
+        }
 
         if (bluetoothDevice == null){
             bluetoothDevice = ((BluetoothListAdapter)pairedListView.getAdapter()).getSelectedBluetoothDevice();
